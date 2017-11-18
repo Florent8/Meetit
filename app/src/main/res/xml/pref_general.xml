@@ -1,0 +1,28 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="@string/location_enabled_key"
+        android:title="@string/location_enabled_title" />
+
+    <EditTextPreference
+        android:capitalize="words"
+        android:defaultValue="@string/search_delay_default_value"
+        android:inputType="textCapWords"
+        android:key="@string/search_delay_key"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="@string/search_delay_title" />
+
+    <EditTextPreference
+        android:capitalize="words"
+        android:defaultValue="@string/search_radius_default_value"
+        android:inputType="textCapWords"
+        android:key="@string/search_radius_key"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="@string/search_radius_title" />
+
+</PreferenceScreen>

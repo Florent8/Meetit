@@ -1,9 +1,11 @@
-package fr.fcomte.univ.iut.martin.florent.meetit;
+package fr.fcomte.univ.iut.martin.florent.meetit.views.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -12,15 +14,21 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import fr.fcomte.univ.iut.martin.florent.meetit.views.fragments.CameraFragment;
+import fr.fcomte.univ.iut.martin.florent.meetit.views.fragments.CreditsFragment;
+import fr.fcomte.univ.iut.martin.florent.meetit.views.fragments.DataFragment;
+import fr.fcomte.univ.iut.martin.florent.meetit.views.fragments.HomeFragment;
+import fr.fcomte.univ.iut.martin.florent.meetit.views.fragments.MapFragment;
+
 import static fr.fcomte.univ.iut.martin.florent.meetit.R.id.action_settings;
+import static fr.fcomte.univ.iut.martin.florent.meetit.R.id.content_main;
 import static fr.fcomte.univ.iut.martin.florent.meetit.R.id.drawer_layout;
 import static fr.fcomte.univ.iut.martin.florent.meetit.R.id.fab;
 import static fr.fcomte.univ.iut.martin.florent.meetit.R.id.nav_camera;
-import static fr.fcomte.univ.iut.martin.florent.meetit.R.id.nav_gallery;
-import static fr.fcomte.univ.iut.martin.florent.meetit.R.id.nav_manage;
-import static fr.fcomte.univ.iut.martin.florent.meetit.R.id.nav_send;
-import static fr.fcomte.univ.iut.martin.florent.meetit.R.id.nav_share;
-import static fr.fcomte.univ.iut.martin.florent.meetit.R.id.nav_slideshow;
+import static fr.fcomte.univ.iut.martin.florent.meetit.R.id.nav_credits;
+import static fr.fcomte.univ.iut.martin.florent.meetit.R.id.nav_data;
+import static fr.fcomte.univ.iut.martin.florent.meetit.R.id.nav_home;
+import static fr.fcomte.univ.iut.martin.florent.meetit.R.id.nav_map;
 import static fr.fcomte.univ.iut.martin.florent.meetit.R.id.nav_view;
 import static fr.fcomte.univ.iut.martin.florent.meetit.R.id.toolbar;
 import static fr.fcomte.univ.iut.martin.florent.meetit.R.layout.activity_main;
@@ -30,6 +38,12 @@ import static fr.fcomte.univ.iut.martin.florent.meetit.R.string.navigation_drawe
 
 public final class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    private Fragment fragment;
+
+    void changeFragment() {
+        getSupportFragmentManager().beginTransaction().replace(content_main, fragment).commit();
+    }
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -48,6 +62,9 @@ public final class MainActivity extends AppCompatActivity
         toggle.syncState();
 
         ((NavigationView) findViewById(nav_view)).setNavigationItemSelectedListener(this);
+
+        fragment = new HomeFragment();
+        changeFragment();
     }
 
     @Override
@@ -73,36 +90,35 @@ public final class MainActivity extends AppCompatActivity
         // as you specify a parent activity in AndroidManifest.xml.
 
         //noinspection SimplifiableIfStatement
-        if (item.getItemId() == action_settings)
+        if (item.getItemId() == action_settings) {
+            startActivity(new Intent(this, SettingsActivity.class));
             return true;
+        }
         return super.onOptionsItemSelected(item);
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(@NonNull final MenuItem item) {
         // Handle navigation view item clicks here.
         switch (item.getItemId()) {
+            case nav_home:
+                fragment = new HomeFragment();
+                break;
             case nav_camera:
-                // Handle the camera action
+                fragment = new CameraFragment();
                 break;
-            case nav_gallery:
-
+            case nav_data:
+                fragment = new DataFragment();
                 break;
-            case nav_slideshow:
-
+            case nav_map:
+                fragment = new MapFragment();
                 break;
-            case nav_manage:
-
-                break;
-            case nav_share:
-
-                break;
-            case nav_send:
-
+            case nav_credits:
+                fragment = new CreditsFragment();
                 break;
         }
 
+        changeFragment();
         ((DrawerLayout) findViewById(drawer_layout)).closeDrawer(GravityCompat.START);
         return true;
     }
