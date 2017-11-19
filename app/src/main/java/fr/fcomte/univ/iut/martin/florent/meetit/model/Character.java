@@ -41,4 +41,19 @@ public final class Character {
             stringBuilder.append("\n").append(lastname);
         return stringBuilder.toString();
     }
+
+    public String toStringInline() {
+        stringBuilder.append(firstname);
+        if (lastname != null)
+            stringBuilder.append(" ").append(lastname);
+        return stringBuilder.toString();
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
 }

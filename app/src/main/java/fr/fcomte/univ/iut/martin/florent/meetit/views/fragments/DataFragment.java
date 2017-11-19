@@ -55,6 +55,7 @@ public final class DataFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull final LayoutInflater inflater, final ViewGroup container,
                              final Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
         root = inflater.inflate(fragment_data, container, false);
 
         // Set the adapter

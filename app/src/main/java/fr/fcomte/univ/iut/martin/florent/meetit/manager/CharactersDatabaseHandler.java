@@ -95,7 +95,7 @@ public final class CharactersDatabaseHandler extends SQLiteOpenHelper {
         }
     }
 
-    private List<Character> getCharacters(final long n) {
+    public List<Character> getCharacters(final long n) {
         final List<Character> characters = new ArrayList<>();
         final SQLiteDatabase db = getReadableDatabase();
         @SuppressLint("Recycle") final Cursor cursor = db.rawQuery(stringBuilder.append("SELECT * FROM ").append(TABLE_CHARACTERS)

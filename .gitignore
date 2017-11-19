@@ -53,3 +53,6 @@ google-services.json
 freeline.py
 freeline/
 freeline_project_description.json
+
+# File for this project
+/app/src/main/res/values/private_strings.xml
