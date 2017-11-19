@@ -11,7 +11,8 @@ public final class MyStringBuilder {
 
     @Override
     public String toString() {
+        final String s = stringBuilder.toString();
         stringBuilder.setLength(0);
-        return stringBuilder.toString();
+        return s;
     }
 }

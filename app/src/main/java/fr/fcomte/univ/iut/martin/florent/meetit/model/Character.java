@@ -4,6 +4,8 @@ import android.graphics.Bitmap;
 
 import fr.fcomte.univ.iut.martin.florent.meetit.string.MyStringBuilder;
 
+import static android.graphics.Bitmap.createScaledBitmap;
+
 public final class Character {
     private final MyStringBuilder stringBuilder = new MyStringBuilder();
     private final int id;
@@ -21,31 +23,11 @@ public final class Character {
         this.weburl = weburl;
         this.latitude = latitude;
         this.longitude = longitude;
-        this.image = image;
+        this.image = createScaledBitmap(image, 150, 200, false);
     }
 
     public int getId() {
         return id;
-    }
-
-    public String getFirstname() {
-        return firstname;
-    }
-
-    public String getLastname() {
-        return lastname;
-    }
-
-    public String getWeburl() {
-        return weburl;
-    }
-
-    public double getLatitude() {
-        return latitude;
-    }
-
-    public double getLongitude() {
-        return longitude;
     }
 
     public Bitmap getImage() {
@@ -54,6 +36,9 @@ public final class Character {
 
     @Override
     public String toString() {
-        return stringBuilder.append(firstname).append(" ").append(lastname).toString();
+        stringBuilder.append(firstname);
+        if (lastname != null)
+            stringBuilder.append("\n").append(lastname);
+        return stringBuilder.toString();
     }
 }

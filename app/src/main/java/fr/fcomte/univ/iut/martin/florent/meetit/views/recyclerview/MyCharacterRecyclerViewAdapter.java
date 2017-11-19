@@ -1,16 +1,22 @@
 package fr.fcomte.univ.iut.martin.florent.meetit.views.recyclerview;
 
+import android.graphics.Bitmap;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.List;
 
-import fr.fcomte.univ.iut.martin.florent.meetit.R;
 import fr.fcomte.univ.iut.martin.florent.meetit.model.Character;
 
+import static android.view.animation.AnimationUtils.loadAnimation;
+import static fr.fcomte.univ.iut.martin.florent.meetit.R.anim.slide_in_right;
+import static fr.fcomte.univ.iut.martin.florent.meetit.R.id.image_view_character;
+import static fr.fcomte.univ.iut.martin.florent.meetit.R.id.text_view_character;
 import static fr.fcomte.univ.iut.martin.florent.meetit.R.layout.fragment_character;
 
 /**
@@ -19,30 +25,29 @@ import static fr.fcomte.univ.iut.martin.florent.meetit.R.layout.fragment_charact
 public final class MyCharacterRecyclerViewAdapter extends RecyclerView.Adapter<MyCharacterRecyclerViewAdapter.CharacterViewHolder> {
 
     private final List<Character> characters;
+    private int firstAnimations = 5;
 
-    public MyCharacterRecyclerViewAdapter(List<Character> items) {
-        characters = items;
+    public MyCharacterRecyclerViewAdapter(final List<Character> characters) {
+        this.characters = characters;
     }
 
     @Override
-    public CharacterViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(fragment_character, parent, false);
-        return new CharacterViewHolder(view);
+    public CharacterViewHolder onCreateViewHolder(final ViewGroup parent, final int viewType) {
+        return new CharacterViewHolder(LayoutInflater.from(parent.getContext())
+                .inflate(fragment_character, parent, false));
     }
 
     @Override
     public void onBindViewHolder(final CharacterViewHolder holder, int position) {
-        holder.mItem = characters.get(position);
-        //holder.mIdView.setText(characters.get(position).id);
-        //holder.mContentView.setText(characters.get(position).content);
-
-        holder.mView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-            }
-        });
+        final Character character = characters.get(position);
+        holder.setText(character.toString());
+        holder.setImageBitmap(character.getImage());
+        int startOffset = 0;
+        if (firstAnimations > 0) {
+            firstAnimations--;
+            startOffset = (position % 5) * 200;
+        }
+        holder.anim(startOffset);
     }
 
     @Override
@@ -50,22 +55,30 @@ public final class MyCharacterRecyclerViewAdapter extends RecyclerView.Adapter<M
         return characters.size();
     }
 
-    public class CharacterViewHolder extends RecyclerView.ViewHolder {
-        public final View mView;
-        public final TextView mIdView;
-        public final TextView mContentView;
-        public Character mItem;
+    final class CharacterViewHolder extends RecyclerView.ViewHolder {
+        private final View view;
+        private final ImageView imageView;
+        private final TextView textView;
 
-        public CharacterViewHolder(View view) {
+        CharacterViewHolder(final View view) {
             super(view);
-            mView = view;
-            mIdView = (TextView) view.findViewById(R.id.id);
-            mContentView = (TextView) view.findViewById(R.id.content);
+            this.view = view;
+            imageView = view.findViewById(image_view_character);
+            textView = view.findViewById(text_view_character);
         }
 
-        @Override
-        public String toString() {
-            return super.toString() + " '" + mContentView.getText() + "'";
+        void setText(final String text) {
+            textView.setText(text);
+        }
+
+        void setImageBitmap(final Bitmap imageBitmap) {
+            imageView.setImageBitmap(imageBitmap);
+        }
+
+        void anim(final long startOffset) {
+            final Animation animation = loadAnimation(view.getContext(), slide_in_right);
+            animation.setStartOffset(startOffset);
+            view.startAnimation(animation);
         }
     }
 }

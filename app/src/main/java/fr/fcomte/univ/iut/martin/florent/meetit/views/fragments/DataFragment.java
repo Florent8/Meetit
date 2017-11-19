@@ -3,6 +3,7 @@ package fr.fcomte.univ.iut.martin.florent.meetit.views.fragments;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -11,13 +12,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-
+import fr.fcomte.univ.iut.martin.florent.meetit.manager.CharactersDatabaseHandler;
 import fr.fcomte.univ.iut.martin.florent.meetit.string.MyStringBuilder;
 import fr.fcomte.univ.iut.martin.florent.meetit.views.recyclerview.MyCharacterRecyclerViewAdapter;
 
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 import static fr.fcomte.univ.iut.martin.florent.meetit.R.id.characters_recycler_view;
+import static fr.fcomte.univ.iut.martin.florent.meetit.R.id.text_characters_number;
 import static fr.fcomte.univ.iut.martin.florent.meetit.R.id.text_location_switch;
 import static fr.fcomte.univ.iut.martin.florent.meetit.R.id.text_search_delay;
 import static fr.fcomte.univ.iut.martin.florent.meetit.R.id.text_search_radius;
@@ -35,6 +36,7 @@ import static fr.fcomte.univ.iut.martin.florent.meetit.R.string.search_radius_ke
 public final class DataFragment extends Fragment {
 
     private final MyStringBuilder stringBuilder = new MyStringBuilder();
+    private CharactersDatabaseHandler handler;
     private View root;
 
     /**
@@ -45,6 +47,12 @@ public final class DataFragment extends Fragment {
     }
 
     @Override
+    public void onCreate(@Nullable final Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        handler = new CharactersDatabaseHandler(getContext());
+    }
+
+    @Override
     public View onCreateView(@NonNull final LayoutInflater inflater, final ViewGroup container,
                              final Bundle savedInstanceState) {
         root = inflater.inflate(fragment_data, container, false);
@@ -52,7 +60,7 @@ public final class DataFragment extends Fragment {
         // Set the adapter
         final RecyclerView recyclerView = root.findViewById(characters_recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerView.setAdapter(new MyCharacterRecyclerViewAdapter(new ArrayList<>()));
+        recyclerView.setAdapter(new MyCharacterRecyclerViewAdapter(handler.getAllCharacters()));
 
         return root;
     }
@@ -70,6 +78,9 @@ public final class DataFragment extends Fragment {
         ((TextView) root.findViewById(text_search_radius)).setText(stringBuilder.append(" ").append(
                 preferences.getString(getResources().getString(search_radius_key),
                         getResources().getString(search_radius_default_value))
+        ).toString());
+        ((TextView) root.findViewById(text_characters_number)).setText(stringBuilder.append(" ").append(
+                Long.toString(handler.length())
         ).toString());
     }
 
