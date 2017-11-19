@@ -95,4 +95,9 @@
     <string name="location_enabled_key">location_enabled</string>
     <string name="search_delay_key">search_delay</string>
     <string name="search_radius_key">search_radius</string>
+    <string name="pref_location_switch">Location enabled:</string>
+    <string name="pref_search_delay">Search delay:</string>
+    <string name="pref_search_radius">Search radius:</string>
+    <string name="number_of_characters">Number of characters:</string>
+    <string name="location_enabled_default_value">false</string>
 </resources>

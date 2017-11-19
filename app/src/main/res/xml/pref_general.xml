@@ -1,7 +1,7 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <SwitchPreference
-        android:defaultValue="false"
+        android:defaultValue="@string/location_enabled_default_value"
         android:key="@string/location_enabled_key"
         android:title="@string/location_enabled_title" />
 
