@@ -19,7 +19,7 @@ import static fr.fcomte.univ.iut.martin.florent.meetit.R.string.api_key;
 import static fr.fcomte.univ.iut.martin.florent.meetit.R.string.key_neighbor_intent;
 import static fr.fcomte.univ.iut.martin.florent.meetit.R.string.key_neighbor_path;
 
-public final class NeighborAsyncTask extends AsyncTask<Location, Object, Object> {
+public final class NeighborAsyncTask extends AsyncTask<Location, Void, Void> {
 
     public static final String LOCATION_LENGTH = "location_length";
     private final MyStringBuilder stringBuilder = new MyStringBuilder();
@@ -34,7 +34,7 @@ public final class NeighborAsyncTask extends AsyncTask<Location, Object, Object>
     }
 
     @Override
-    protected Location doInBackground(final Location[] locations) {
+    protected Void doInBackground(final Location[] locations) {
         final Intent intent = new Intent(context.getResources().getString(key_neighbor_intent));
         intent.putExtra(LOCATION_LENGTH, locations.length);
         for (int i = 0; i < locations.length; i++)
