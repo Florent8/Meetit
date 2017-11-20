@@ -1,5 +1,6 @@
 # Meetit
-Application développée en cours d'Android en Licence Professionnelle Mobilité Numérique à Belfort
+Application développée en cours d'Android en Licence Professionnelle Mobilité Numérique à Belfort.
+
 Sujet du cours dans le fichier `Sujet.pdf`.
 
 ### Clef d'API Google Map
