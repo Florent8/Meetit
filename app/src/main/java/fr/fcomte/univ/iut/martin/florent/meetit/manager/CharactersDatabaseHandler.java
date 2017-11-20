@@ -90,7 +90,7 @@ public final class CharactersDatabaseHandler extends SQLiteOpenHelper {
             values.clear();
             values.put(KEY_IMAGE, bitmapdata);
             db.update(TABLE_CHARACTERS, values, stringBuilder.append(KEY_ID).append(" = ?").toString(), new String[]{Long.toString(id)});
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
         }
     }

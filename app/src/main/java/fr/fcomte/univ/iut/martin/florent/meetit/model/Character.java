@@ -56,4 +56,8 @@ public final class Character {
     public double getLongitude() {
         return longitude;
     }
+
+    public String getWeburl() {
+        return weburl;
+    }
 }

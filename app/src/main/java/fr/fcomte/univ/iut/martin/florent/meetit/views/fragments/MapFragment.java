@@ -2,8 +2,10 @@ package fr.fcomte.univ.iut.martin.florent.meetit.views.fragments;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -25,15 +27,19 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import fr.fcomte.univ.iut.martin.florent.meetit.manager.CharactersDatabaseHandler;
 import fr.fcomte.univ.iut.martin.florent.meetit.model.Character;
 import fr.fcomte.univ.iut.martin.florent.meetit.string.MyStringBuilder;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static android.content.Intent.ACTION_VIEW;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 import static android.support.v4.content.ContextCompat.checkSelfPermission;
@@ -52,7 +58,8 @@ import static fr.fcomte.univ.iut.martin.florent.meetit.R.string.search_radius_ke
  * A simple {@link Fragment} subclass.
  */
 public final class MapFragment extends Fragment implements OnMapReadyCallback,
-        GoogleApiClient.ConnectionCallbacks {
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleMap.OnMarkerClickListener {
 
     private static final int REQUEST_LOCATION = 1;
     private final MyStringBuilder stringBuilder = new MyStringBuilder();
@@ -95,13 +102,15 @@ public final class MapFragment extends Fragment implements OnMapReadyCallback,
     @Override
     public void onMapReady(final GoogleMap googleMap) {
         this.googleMap = googleMap;
+        this.googleMap.setOnMarkerClickListener(this);
     }
 
     private void updateUI(final Location location) {
         googleMap.clear();
 
-        stringBuilder.append(Double.toString(location.getLatitude())).append(" ")
-                .append(Double.toString(location.getLongitude()));
+        if (location != null)
+            stringBuilder.append(Double.toString(location.getLatitude())).append(" ")
+                    .append(Double.toString(location.getLongitude()));
 
         final List<Character> characters = handler.getCharacters(4);
         final LatLngBounds.Builder builder = LatLngBounds.builder();
@@ -109,19 +118,22 @@ public final class MapFragment extends Fragment implements OnMapReadyCallback,
         for (Character character : characters) {
             final LatLng latLng = new LatLng(character.getLatitude(), character.getLongitude());
             final MarkerOptions markerOptions = new MarkerOptions().position(latLng).title(character.toString()).alpha(0.5f);
-            final Location characterLocation = new Location("");
-            characterLocation.setLatitude(character.getLatitude());
-            characterLocation.setLongitude(character.getLongitude());
-            if (location.distanceTo(characterLocation) <= Float.parseFloat(preferences.getString(getResources().getString(search_radius_key),
-                    getResources().getString(search_radius_default_value)))) {
-                markerOptions.alpha(1f);
-                stringBuilder.append("\n").append(character.toStringInline());
+            if (location != null) {
+                final Location characterLocation = new Location("");
+                characterLocation.setLatitude(character.getLatitude());
+                characterLocation.setLongitude(character.getLongitude());
+                if (location.distanceTo(characterLocation) <= Float.parseFloat(preferences.getString(getResources().getString(search_radius_key),
+                        getResources().getString(search_radius_default_value)))) {
+                    markerOptions.alpha(1f);
+                    stringBuilder.append("\n").append(character.toStringInline());
+                }
             }
-            googleMap.addMarker(markerOptions);
+            googleMap.addMarker(markerOptions).setTag(character.getWeburl());
             builder.include(latLng);
         }
 
-        Toast.makeText(context, stringBuilder.toString(), Toast.LENGTH_LONG).show();
+        if (location != null)
+            Toast.makeText(context, stringBuilder.toString(), Toast.LENGTH_LONG).show();
         googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 40));
     }
 
@@ -139,10 +151,8 @@ public final class MapFragment extends Fragment implements OnMapReadyCallback,
 
     @Override
     public void onConnected(@Nullable final Bundle bundle) {
-        if (requestionLocationUpdates)
-            startLocationUpdates();
-        else
-            stopLocationUpdates();
+        startOrStopLocationUpdates();
+        updateUI(null);
     }
 
     private void requestLocationPermission() {
@@ -188,10 +198,19 @@ public final class MapFragment extends Fragment implements OnMapReadyCallback,
         getFusedLocationProviderClient(context).removeLocationUpdates(locationCallback);
     }
 
+    private void startOrStopLocationUpdates() {
+        if (requestionLocationUpdates)
+            startLocationUpdates();
+        else
+            stopLocationUpdates();
+    }
+
     @Override
     public void onResume() {
         super.onResume();
         setLocationParmeters();
+        if (googleApiClient.isConnected())
+            startOrStopLocationUpdates();
     }
 
     @Override
@@ -202,5 +221,11 @@ public final class MapFragment extends Fragment implements OnMapReadyCallback,
 
     @Override
     public void onConnectionSuspended(final int i) {
+    }
+
+    @Override
+    public boolean onMarkerClick(final Marker marker) {
+        startActivity(new Intent(ACTION_VIEW, Uri.parse((String) marker.getTag())));
+        return false;
     }
 }
