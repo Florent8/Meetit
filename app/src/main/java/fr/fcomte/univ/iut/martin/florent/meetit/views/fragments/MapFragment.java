@@ -1,8 +1,10 @@
 package fr.fcomte.univ.iut.martin.florent.meetit.views.fragments;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.net.Uri;
@@ -30,13 +32,12 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import fr.fcomte.univ.iut.martin.florent.meetit.manager.CharactersDatabaseHandler;
 import fr.fcomte.univ.iut.martin.florent.meetit.model.Character;
 import fr.fcomte.univ.iut.martin.florent.meetit.string.MyStringBuilder;
+import fr.fcomte.univ.iut.martin.florent.meetit.views.asynctask.NeighborAsyncTask;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static android.content.Intent.ACTION_VIEW;
@@ -47,12 +48,15 @@ import static com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCU
 import static com.google.android.gms.location.LocationServices.getFusedLocationProviderClient;
 import static fr.fcomte.univ.iut.martin.florent.meetit.R.id.map;
 import static fr.fcomte.univ.iut.martin.florent.meetit.R.layout.fragment_map;
+import static fr.fcomte.univ.iut.martin.florent.meetit.R.string.key_neighbor_intent;
+import static fr.fcomte.univ.iut.martin.florent.meetit.R.string.key_neighbor_path;
 import static fr.fcomte.univ.iut.martin.florent.meetit.R.string.location_enabled_default_value;
 import static fr.fcomte.univ.iut.martin.florent.meetit.R.string.location_enabled_key;
 import static fr.fcomte.univ.iut.martin.florent.meetit.R.string.search_delay_default_value;
 import static fr.fcomte.univ.iut.martin.florent.meetit.R.string.search_delay_key;
 import static fr.fcomte.univ.iut.martin.florent.meetit.R.string.search_radius_default_value;
 import static fr.fcomte.univ.iut.martin.florent.meetit.R.string.search_radius_key;
+import static fr.fcomte.univ.iut.martin.florent.meetit.views.asynctask.NeighborAsyncTask.LOCATION_LENGTH;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -71,6 +75,7 @@ public final class MapFragment extends Fragment implements OnMapReadyCallback,
     private LocationRequest locationRequest;
     private boolean requestionLocationUpdates;
     private SharedPreferences preferences;
+    private BroadcastReceiver neighborBR;
 
     public MapFragment() {
         // Required empty public constructor
@@ -88,6 +93,14 @@ public final class MapFragment extends Fragment implements OnMapReadyCallback,
                     .addApi(LocationServices.API)
                     .build();
         }
+        neighborBR = new BroadcastReceiver() {
+            @Override
+            public void onReceive(final Context context, final Intent intent) {
+                final int locationLength = intent.getIntExtra(LOCATION_LENGTH, 0);
+                for (int i = 0; i < locationLength; i++)
+                    Toast.makeText(context, intent.getStringExtra(getResources().getString(key_neighbor_path) + i), Toast.LENGTH_LONG).show();
+            }
+        };
     }
 
     @Override
@@ -114,6 +127,7 @@ public final class MapFragment extends Fragment implements OnMapReadyCallback,
 
         final List<Character> characters = handler.getCharacters(4);
         final LatLngBounds.Builder builder = LatLngBounds.builder();
+        final Location[] charactersLocations = new Location[characters.size()];
 
         for (Character character : characters) {
             final LatLng latLng = new LatLng(character.getLatitude(), character.getLongitude());
@@ -127,13 +141,16 @@ public final class MapFragment extends Fragment implements OnMapReadyCallback,
                     markerOptions.alpha(1f);
                     stringBuilder.append("\n").append(character.toStringInline());
                 }
+                charactersLocations[characters.indexOf(character)] = characterLocation;
             }
             googleMap.addMarker(markerOptions).setTag(character.getWeburl());
             builder.include(latLng);
         }
 
-        if (location != null)
+        if (location != null) {
             Toast.makeText(context, stringBuilder.toString(), Toast.LENGTH_LONG).show();
+            new NeighborAsyncTask(context.getApplicationContext(), location).execute(charactersLocations);
+        }
         googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 40));
     }
 
@@ -211,12 +228,15 @@ public final class MapFragment extends Fragment implements OnMapReadyCallback,
         setLocationParmeters();
         if (googleApiClient.isConnected())
             startOrStopLocationUpdates();
+        context.registerReceiver(neighborBR,
+                new IntentFilter(getResources().getString(key_neighbor_intent)));
     }
 
     @Override
     public void onPause() {
         super.onPause();
         stopLocationUpdates();
+        context.unregisterReceiver(neighborBR);
     }
 
     @Override
