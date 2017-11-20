@@ -6,22 +6,30 @@ import android.content.Intent;
 import android.location.Location;
 import android.os.AsyncTask;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+import fr.fcomte.univ.iut.martin.florent.meetit.model.Character;
 import fr.fcomte.univ.iut.martin.florent.meetit.string.MyStringBuilder;
 
 import static fr.fcomte.univ.iut.martin.florent.meetit.R.string.api_key;
 import static fr.fcomte.univ.iut.martin.florent.meetit.R.string.key_neighbor_intent;
 import static fr.fcomte.univ.iut.martin.florent.meetit.R.string.key_neighbor_path;
 
-public final class NeighborAsyncTask extends AsyncTask<Location, Void, Void> {
+public final class NeighborAsyncTask extends AsyncTask<Map<Location, Character>, Void, Void> {
 
-    public static final String LOCATION_LENGTH = "location_length";
     private final MyStringBuilder stringBuilder = new MyStringBuilder();
     @SuppressLint("StaticFieldLeak")
     private final Context context;
@@ -34,12 +42,26 @@ public final class NeighborAsyncTask extends AsyncTask<Location, Void, Void> {
     }
 
     @Override
-    protected Void doInBackground(final Location[] locations) {
-        final Intent intent = new Intent(context.getResources().getString(key_neighbor_intent));
-        intent.putExtra(LOCATION_LENGTH, locations.length);
-        for (int i = 0; i < locations.length; i++)
-            intent.putExtra(context.getResources().getString(key_neighbor_path) + i, getPathLength(location, locations[i]));
-        context.sendBroadcast(intent);
+    protected Void doInBackground(final Map<Location, Character>[] maps) {
+        final Map<Character, Integer> mapDistance = new HashMap<>();
+        final List<Integer> distances = new ArrayList<>();
+        for (Map<Location, Character> map : maps)
+            for (Map.Entry<Location, Character> entry : map.entrySet()) {
+                final int distance = getDistance(getPathLength(location, entry.getKey()));
+                distances.add(distance);
+                mapDistance.put(entry.getValue(), distance);
+            }
+
+        Collections.sort(distances);
+
+        stringBuilder.append("Personnes de la plus proche à la plus lointaine :");
+        for (int distance : distances)
+            for (Map.Entry<Character, Integer> entry : mapDistance.entrySet())
+                if (distance == entry.getValue())
+                    stringBuilder.append("\n").append(entry.getKey().toStringInline());
+
+        context.sendBroadcast(new Intent(context.getResources().getString(key_neighbor_intent))
+                .putExtra(context.getResources().getString(key_neighbor_path), stringBuilder.toString()));
         return null;
     }
 
@@ -70,6 +92,21 @@ public final class NeighborAsyncTask extends AsyncTask<Location, Void, Void> {
         } catch (IOException e) {
             e.printStackTrace();
             return null;
+        }
+    }
+
+    private int getDistance(final String jsontext) {
+        try {
+            return new JSONObject(jsontext)
+                    .getJSONArray("routes")
+                    .getJSONObject(0)
+                    .getJSONArray("legs")
+                    .getJSONObject(0)
+                    .getJSONObject("distance")
+                    .getInt("value");
+        } catch (final JSONException e) {
+            e.printStackTrace();
+            return -1;
         }
     }
 }

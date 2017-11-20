@@ -32,7 +32,9 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import fr.fcomte.univ.iut.martin.florent.meetit.manager.CharactersDatabaseHandler;
 import fr.fcomte.univ.iut.martin.florent.meetit.model.Character;
@@ -56,7 +58,6 @@ import static fr.fcomte.univ.iut.martin.florent.meetit.R.string.search_delay_def
 import static fr.fcomte.univ.iut.martin.florent.meetit.R.string.search_delay_key;
 import static fr.fcomte.univ.iut.martin.florent.meetit.R.string.search_radius_default_value;
 import static fr.fcomte.univ.iut.martin.florent.meetit.R.string.search_radius_key;
-import static fr.fcomte.univ.iut.martin.florent.meetit.views.asynctask.NeighborAsyncTask.LOCATION_LENGTH;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -96,9 +97,7 @@ public final class MapFragment extends Fragment implements OnMapReadyCallback,
         neighborBR = new BroadcastReceiver() {
             @Override
             public void onReceive(final Context context, final Intent intent) {
-                final int locationLength = intent.getIntExtra(LOCATION_LENGTH, 0);
-                for (int i = 0; i < locationLength; i++)
-                    Toast.makeText(context, intent.getStringExtra(getResources().getString(key_neighbor_path) + i), Toast.LENGTH_LONG).show();
+                Toast.makeText(context, intent.getStringExtra(getResources().getString(key_neighbor_path)), Toast.LENGTH_LONG).show();
             }
         };
     }
@@ -127,7 +126,7 @@ public final class MapFragment extends Fragment implements OnMapReadyCallback,
 
         final List<Character> characters = handler.getCharacters(4);
         final LatLngBounds.Builder builder = LatLngBounds.builder();
-        final Location[] charactersLocations = new Location[characters.size()];
+        final Map<Location, Character>[] charactersLocations = new Map[characters.size()];
 
         for (Character character : characters) {
             final LatLng latLng = new LatLng(character.getLatitude(), character.getLongitude());
@@ -141,7 +140,9 @@ public final class MapFragment extends Fragment implements OnMapReadyCallback,
                     markerOptions.alpha(1f);
                     stringBuilder.append("\n").append(character.toStringInline());
                 }
-                charactersLocations[characters.indexOf(character)] = characterLocation;
+                Map<Location, Character> map = new HashMap<>();
+                map.put(characterLocation, character);
+                charactersLocations[characters.indexOf(character)] = map;
             }
             googleMap.addMarker(markerOptions).setTag(character.getWeburl());
             builder.include(latLng);
