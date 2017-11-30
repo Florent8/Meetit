@@ -3,36 +3,22 @@ package fr.fcomte.univ.iut.martin.florent.meetit.model;
 import android.graphics.Bitmap;
 
 import fr.fcomte.univ.iut.martin.florent.meetit.string.MyStringBuilder;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 import static android.graphics.Bitmap.createScaledBitmap;
 
+@RequiredArgsConstructor
 public final class Character {
+
     private final MyStringBuilder stringBuilder = new MyStringBuilder();
-    private final int id;
-    private final String firstname;
-    private final String lastname;
-    private final String weburl;
-    private final double latitude;
-    private final double longitude;
-    private final Bitmap image;
-
-    public Character(final int id, final String firstname, final String lastname, final String weburl, final double latitude, final double longitude, final Bitmap image) {
-        this.id = id;
-        this.firstname = firstname;
-        this.lastname = lastname;
-        this.weburl = weburl;
-        this.latitude = latitude;
-        this.longitude = longitude;
-        this.image = createScaledBitmap(image, 150, 200, false);
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public Bitmap getImage() {
-        return image;
-    }
+    @Getter private final int    id;
+    private final         String firstname;
+    private final         String lastname;
+    @Getter private final String weburl;
+    @Getter private final double latitude;
+    @Getter private final double longitude;
+    @Getter private final Bitmap image;
 
     @Override
     public String toString() {
@@ -47,17 +33,5 @@ public final class Character {
         if (lastname != null)
             stringBuilder.append(" ").append(lastname);
         return stringBuilder.toString();
-    }
-
-    public double getLatitude() {
-        return latitude;
-    }
-
-    public double getLongitude() {
-        return longitude;
-    }
-
-    public String getWeburl() {
-        return weburl;
     }
 }

@@ -40,6 +40,7 @@ import fr.fcomte.univ.iut.martin.florent.meetit.manager.CharactersDatabaseHandle
 import fr.fcomte.univ.iut.martin.florent.meetit.model.Character;
 import fr.fcomte.univ.iut.martin.florent.meetit.string.MyStringBuilder;
 import fr.fcomte.univ.iut.martin.florent.meetit.views.asynctask.NeighborAsyncTask;
+import lombok.NoArgsConstructor;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static android.content.Intent.ACTION_VIEW;
@@ -62,25 +63,22 @@ import static fr.fcomte.univ.iut.martin.florent.meetit.R.string.search_radius_ke
 /**
  * A simple {@link Fragment} subclass.
  */
+@NoArgsConstructor
 public final class MapFragment extends Fragment implements OnMapReadyCallback,
-        GoogleApiClient.ConnectionCallbacks,
-        GoogleMap.OnMarkerClickListener {
+                                                           GoogleApiClient.ConnectionCallbacks,
+                                                           GoogleMap.OnMarkerClickListener {
 
-    private static final int REQUEST_LOCATION = 1;
-    private final MyStringBuilder stringBuilder = new MyStringBuilder();
-    private Context context;
+    private static final int             REQUEST_LOCATION = 1;
+    private final        MyStringBuilder stringBuilder    = new MyStringBuilder();
+    private Context                   context;
     private CharactersDatabaseHandler handler;
-    private GoogleMap googleMap;
-    private GoogleApiClient googleApiClient;
-    private LocationCallback locationCallback;
-    private LocationRequest locationRequest;
-    private boolean requestionLocationUpdates;
-    private SharedPreferences preferences;
-    private BroadcastReceiver neighborBR;
-
-    public MapFragment() {
-        // Required empty public constructor
-    }
+    private GoogleMap                 googleMap;
+    private GoogleApiClient           googleApiClient;
+    private LocationCallback          locationCallback;
+    private LocationRequest           locationRequest;
+    private boolean                   requestionLocationUpdates;
+    private SharedPreferences         preferences;
+    private BroadcastReceiver         neighborBR;
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
@@ -95,16 +93,21 @@ public final class MapFragment extends Fragment implements OnMapReadyCallback,
                     .build();
         }
         neighborBR = new BroadcastReceiver() {
+
             @Override
             public void onReceive(final Context context, final Intent intent) {
-                Toast.makeText(context, intent.getStringExtra(getResources().getString(key_neighbor_path)), Toast.LENGTH_LONG).show();
+                Toast.makeText(context,
+                               intent.getStringExtra(getResources().getString(key_neighbor_path)),
+                               Toast.LENGTH_LONG
+                ).show();
             }
         };
     }
 
     @Override
     public View onCreateView(@NonNull final LayoutInflater inflater, final ViewGroup container,
-                             final Bundle savedInstanceState) {
+                             final Bundle savedInstanceState
+    ) {
         // Inflate the layout for this fragment
         final View view = inflater.inflate(fragment_map, container, false);
         ((SupportMapFragment) getChildFragmentManager().findFragmentById(map)).getMapAsync(this);
@@ -122,7 +125,7 @@ public final class MapFragment extends Fragment implements OnMapReadyCallback,
 
         if (location != null)
             stringBuilder.append(Double.toString(location.getLatitude())).append(" ")
-                    .append(Double.toString(location.getLongitude()));
+                         .append(Double.toString(location.getLongitude()));
 
         final List<Character> characters = handler.getCharacters(4);
         final LatLngBounds.Builder builder = LatLngBounds.builder();
@@ -130,13 +133,17 @@ public final class MapFragment extends Fragment implements OnMapReadyCallback,
 
         for (Character character : characters) {
             final LatLng latLng = new LatLng(character.getLatitude(), character.getLongitude());
-            final MarkerOptions markerOptions = new MarkerOptions().position(latLng).title(character.toString()).alpha(0.5f);
+            final MarkerOptions markerOptions = new MarkerOptions().position(latLng)
+                                                                   .title(character.toString())
+                                                                   .alpha(0.5f);
             if (location != null) {
                 final Location characterLocation = new Location("");
                 characterLocation.setLatitude(character.getLatitude());
                 characterLocation.setLongitude(character.getLongitude());
-                if (location.distanceTo(characterLocation) <= Float.parseFloat(preferences.getString(getResources().getString(search_radius_key),
-                        getResources().getString(search_radius_default_value)))) {
+                if (location.distanceTo(characterLocation) <= Float.parseFloat(
+                        preferences.getString(getResources().getString(search_radius_key),
+                                              getResources().getString(search_radius_default_value)
+                        ))) {
                     markerOptions.alpha(1f);
                     stringBuilder.append("\n").append(character.toStringInline());
                 }
@@ -150,7 +157,8 @@ public final class MapFragment extends Fragment implements OnMapReadyCallback,
 
         if (location != null) {
             Toast.makeText(context, stringBuilder.toString(), Toast.LENGTH_LONG).show();
-            new NeighborAsyncTask(context.getApplicationContext(), location).execute(charactersLocations);
+            new NeighborAsyncTask(context.getApplicationContext(), location)
+                    .execute(charactersLocations);
         }
         googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 40));
     }
@@ -185,6 +193,7 @@ public final class MapFragment extends Fragment implements OnMapReadyCallback,
 
     private void setLocationParmeters() {
         locationCallback = new LocationCallback() {
+
             @Override
             public void onLocationResult(final LocationResult locationResult) {
                 super.onLocationResult(locationResult);
@@ -192,14 +201,20 @@ public final class MapFragment extends Fragment implements OnMapReadyCallback,
             }
         };
 
-        requestionLocationUpdates = preferences.getBoolean(getResources().getString(location_enabled_key),
-                Boolean.parseBoolean(getResources().getString(location_enabled_default_value)));
+        requestionLocationUpdates = preferences
+                .getBoolean(getResources().getString(location_enabled_key),
+                            Boolean.parseBoolean(
+                                    getResources().getString(location_enabled_default_value))
+                );
 
         if (requestionLocationUpdates) {
             locationRequest = new LocationRequest();
             locationRequest.setPriority(PRIORITY_HIGH_ACCURACY);
-            final int interval = Integer.parseInt(preferences.getString(getResources().getString(search_delay_key),
-                    getResources().getString(search_delay_default_value)));
+            final int interval = Integer
+                    .parseInt(preferences.getString(getResources().getString(search_delay_key),
+                                                    getResources()
+                                                            .getString(search_delay_default_value)
+                    ));
             locationRequest.setInterval(1000 * interval);
             locationRequest.setFastestInterval(1000 * interval / 2);
         }
@@ -209,7 +224,10 @@ public final class MapFragment extends Fragment implements OnMapReadyCallback,
         if (checkSelfPermission(context, ACCESS_FINE_LOCATION) != PERMISSION_GRANTED)
             requestLocationPermission();
         else
-            getFusedLocationProviderClient(context).requestLocationUpdates(locationRequest, locationCallback, googleApiClient.getLooper());
+            getFusedLocationProviderClient(context)
+                    .requestLocationUpdates(locationRequest, locationCallback,
+                                            googleApiClient.getLooper()
+                    );
     }
 
     private void stopLocationUpdates() {
@@ -230,7 +248,8 @@ public final class MapFragment extends Fragment implements OnMapReadyCallback,
         if (googleApiClient.isConnected())
             startOrStopLocationUpdates();
         context.registerReceiver(neighborBR,
-                new IntentFilter(getResources().getString(key_neighbor_intent)));
+                                 new IntentFilter(getResources().getString(key_neighbor_intent))
+        );
     }
 
     @Override

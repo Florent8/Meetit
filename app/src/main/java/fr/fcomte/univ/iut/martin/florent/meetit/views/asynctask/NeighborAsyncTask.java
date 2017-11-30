@@ -23,23 +23,19 @@ import java.util.Map;
 
 import fr.fcomte.univ.iut.martin.florent.meetit.model.Character;
 import fr.fcomte.univ.iut.martin.florent.meetit.string.MyStringBuilder;
+import lombok.RequiredArgsConstructor;
 
 import static fr.fcomte.univ.iut.martin.florent.meetit.R.string.api_key;
 import static fr.fcomte.univ.iut.martin.florent.meetit.R.string.key_neighbor_intent;
 import static fr.fcomte.univ.iut.martin.florent.meetit.R.string.key_neighbor_path;
 
+@RequiredArgsConstructor
 public final class NeighborAsyncTask extends AsyncTask<Map<Location, Character>, Void, Void> {
 
     private final MyStringBuilder stringBuilder = new MyStringBuilder();
     @SuppressLint("StaticFieldLeak")
     private final Context context;
     private final Location location;
-
-    public NeighborAsyncTask(final Context context, final Location location) {
-        super();
-        this.context = context;
-        this.location = location;
-    }
 
     @Override
     protected Void doInBackground(final Map<Location, Character>[] maps) {

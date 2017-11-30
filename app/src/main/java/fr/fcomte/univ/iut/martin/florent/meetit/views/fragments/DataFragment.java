@@ -15,6 +15,7 @@ import android.widget.TextView;
 import fr.fcomte.univ.iut.martin.florent.meetit.manager.CharactersDatabaseHandler;
 import fr.fcomte.univ.iut.martin.florent.meetit.string.MyStringBuilder;
 import fr.fcomte.univ.iut.martin.florent.meetit.views.recyclerview.MyCharacterRecyclerViewAdapter;
+import lombok.NoArgsConstructor;
 
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 import static fr.fcomte.univ.iut.martin.florent.meetit.R.id.characters_recycler_view;
@@ -33,18 +34,12 @@ import static fr.fcomte.univ.iut.martin.florent.meetit.R.string.search_radius_ke
 /**
  * A fragment representing a list of Items.
  */
+@NoArgsConstructor
 public final class DataFragment extends Fragment {
 
     private final MyStringBuilder stringBuilder = new MyStringBuilder();
     private CharactersDatabaseHandler handler;
-    private View root;
-
-    /**
-     * Mandatory empty constructor for the fragment manager to instantiate the
-     * fragment (e.g. upon screen orientation changes).
-     */
-    public DataFragment() {
-    }
+    private View                      root;
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
@@ -54,7 +49,8 @@ public final class DataFragment extends Fragment {
 
     @Override
     public View onCreateView(@NonNull final LayoutInflater inflater, final ViewGroup container,
-                             final Bundle savedInstanceState) {
+                             final Bundle savedInstanceState
+    ) {
         // Inflate the layout for this fragment
         root = inflater.inflate(fragment_data, container, false);
 
@@ -68,21 +64,27 @@ public final class DataFragment extends Fragment {
 
     private void updateUI() {
         final SharedPreferences preferences = getDefaultSharedPreferences(getContext());
-        ((TextView) root.findViewById(text_location_switch)).setText(stringBuilder.append(" ").append(Boolean.toString(
-                preferences.getBoolean(getResources().getString(location_enabled_key),
-                        Boolean.parseBoolean(getResources().getString((location_enabled_default_value)))))
-        ).toString());
+        ((TextView) root.findViewById(text_location_switch))
+                .setText(stringBuilder.append(" ").append(Boolean.toString(
+                        preferences.getBoolean(getResources().getString(location_enabled_key),
+                                               Boolean.parseBoolean(getResources().getString(
+                                                       (location_enabled_default_value)))
+                        ))
+                ).toString());
         ((TextView) root.findViewById(text_search_delay)).setText(stringBuilder.append(" ").append(
                 preferences.getString(getResources().getString(search_delay_key),
-                        getResources().getString(search_delay_default_value))
+                                      getResources().getString(search_delay_default_value)
+                )
         ).toString());
         ((TextView) root.findViewById(text_search_radius)).setText(stringBuilder.append(" ").append(
                 preferences.getString(getResources().getString(search_radius_key),
-                        getResources().getString(search_radius_default_value))
+                                      getResources().getString(search_radius_default_value)
+                )
         ).toString());
-        ((TextView) root.findViewById(text_characters_number)).setText(stringBuilder.append(" ").append(
-                Long.toString(handler.length())
-        ).toString());
+        ((TextView) root.findViewById(text_characters_number))
+                .setText(stringBuilder.append(" ").append(
+                        Long.toString(handler.length())
+                ).toString());
     }
 
     @Override

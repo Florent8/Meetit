@@ -16,29 +16,30 @@ import fr.fcomte.univ.iut.martin.florent.meetit.model.Character;
 import fr.fcomte.univ.iut.martin.florent.meetit.string.MyStringBuilder;
 
 import static android.database.DatabaseUtils.queryNumEntries;
+import static android.graphics.Bitmap.createScaledBitmap;
 import static android.graphics.BitmapFactory.decodeByteArray;
 
 public final class CharactersDatabaseHandler extends SQLiteOpenHelper {
 
     // Database
-    private static final String DATABASE_NAME = "characters_db";
-    private static final int DATABASE_VERSION = 1;
+    private static final String DATABASE_NAME    = "characters_db";
+    private static final int    DATABASE_VERSION = 1;
 
     // Table Characters
     private static final String TABLE_CHARACTERS = "characters";
 
     // Table Characters content
-    private static final String KEY_ID = "id";
+    private static final String KEY_ID        = "id";
     private static final String KEY_FIRSTNAME = "firstname";
-    private static final String KEY_LASTNAME = "lastname";
-    private static final String KEY_WEBURL = "weburl";
-    private static final String KEY_LATITUDE = "latitude";
+    private static final String KEY_LASTNAME  = "lastname";
+    private static final String KEY_WEBURL    = "weburl";
+    private static final String KEY_LATITUDE  = "latitude";
     private static final String KEY_LONGITUDE = "longitude";
-    private static final String KEY_IMAGE = "image";
+    private static final String KEY_IMAGE     = "image";
 
     // Attributs
     private final MyStringBuilder stringBuilder = new MyStringBuilder();
-    private final ContentValues values = new ContentValues();
+    private final ContentValues   values        = new ContentValues();
     private final Context context;
 
     public CharactersDatabaseHandler(final Context context) {
@@ -49,25 +50,39 @@ public final class CharactersDatabaseHandler extends SQLiteOpenHelper {
     @Override
     public void onCreate(final SQLiteDatabase db) {
         db.execSQL(stringBuilder.append("CREATE TABLE ").append(TABLE_CHARACTERS).append("(")
-                .append(KEY_ID).append(" INTEGER PRIMARY KEY,")
-                .append(KEY_FIRSTNAME).append(" TEXT DEFAULT NULL,")
-                .append(KEY_LASTNAME).append(" TEXT DEFAULT NULL,")
-                .append(KEY_WEBURL).append(" TEXT DEFAULT NULL,")
-                .append(KEY_LATITUDE).append(" REAL DEFAULT NULL,")
-                .append(KEY_LONGITUDE).append(" REAL DEFAULT NULL,")
-                .append(KEY_IMAGE).append(" BLOB DEFAULT NULL)")
-                .toString());
-        updateImage(db, "couchot.png", insert(db, "Jean-François", "Couchot", "http://members.femto-st.fr/jf-couchot/fr", 47.642900, 6.840027));
-        updateImage(db, "couturier.png", insert(db, "Raphaël", "Couturier", "http://members.femto-st.fr/raphael-couturier/fr", 47.659518, 6.813337));
-        updateImage(db, "domas.png", insert(db, "Stéphane", "Domas", "http://info.iut-bm.univ-fcomte.fr/staff/sdomas/", 47.6387143, 6.8370225));
-        updateImage(db, "makhoul.png", insert(db, "Abdallah", "Makhoul", "http://members.femto-st.fr/abdallah-makhoul/fr", 47.638114, 6.862139));
+                                .append(KEY_ID).append(" INTEGER PRIMARY KEY,")
+                                .append(KEY_FIRSTNAME).append(" TEXT DEFAULT NULL,")
+                                .append(KEY_LASTNAME).append(" TEXT DEFAULT NULL,")
+                                .append(KEY_WEBURL).append(" TEXT DEFAULT NULL,")
+                                .append(KEY_LATITUDE).append(" REAL DEFAULT NULL,")
+                                .append(KEY_LONGITUDE).append(" REAL DEFAULT NULL,")
+                                .append(KEY_IMAGE).append(" BLOB DEFAULT NULL)")
+                                .toString());
+        updateImage(db, "couchot.png", insert(db, "Jean-François", "Couchot",
+                                              "http://members.femto-st.fr/jf-couchot/fr", 47.642900,
+                                              6.840027
+        ));
+        updateImage(db, "couturier.png", insert(db, "Raphaël", "Couturier",
+                                                "http://members.femto-st.fr/raphael-couturier/fr",
+                                                47.659518, 6.813337
+        ));
+        updateImage(db, "domas.png", insert(db, "Stéphane", "Domas",
+                                            "http://info.iut-bm.univ-fcomte.fr/staff/sdomas/",
+                                            47.6387143, 6.8370225
+        ));
+        updateImage(db, "makhoul.png", insert(db, "Abdallah", "Makhoul",
+                                              "http://members.femto-st.fr/abdallah-makhoul/fr",
+                                              47.638114, 6.862139
+        ));
         updateImage(db, "chocolat.png", insert(db, "Chocolat", null, null, 0, 0));
         updateImage(db, "mini_mew.png", insert(db, "Mini Mew", null, null, 0, 0));
         updateImage(db, "rin.png", insert(db, "Rin", "Tezuka", null, 0, 0));
         updateImage(db, "yami.png", insert(db, "Konjiki no Yami", null, null, 0, 0));
     }
 
-    private long insert(final SQLiteDatabase db, final String firstname, final String lastname, final String weburl, final double latitude, final double longitude) {
+    private long insert(final SQLiteDatabase db, final String firstname, final String lastname,
+                        final String weburl, final double latitude, final double longitude
+    ) {
         values.clear();
         values.put(KEY_FIRSTNAME, firstname);
         values.put(KEY_LASTNAME, lastname);
@@ -89,7 +104,10 @@ public final class CharactersDatabaseHandler extends SQLiteOpenHelper {
 
             values.clear();
             values.put(KEY_IMAGE, bitmapdata);
-            db.update(TABLE_CHARACTERS, values, stringBuilder.append(KEY_ID).append(" = ?").toString(), new String[]{Long.toString(id)});
+            db.update(TABLE_CHARACTERS, values,
+                      stringBuilder.append(KEY_ID).append(" = ?").toString(),
+                      new String[]{Long.toString(id)}
+            );
         } catch (final IOException e) {
             e.printStackTrace();
         }
@@ -98,18 +116,24 @@ public final class CharactersDatabaseHandler extends SQLiteOpenHelper {
     public List<Character> getCharacters(final long n) {
         final List<Character> characters = new ArrayList<>();
         final SQLiteDatabase db = getReadableDatabase();
-        @SuppressLint("Recycle") final Cursor cursor = db.rawQuery(stringBuilder.append("SELECT * FROM ").append(TABLE_CHARACTERS)
-                .append(" LIMIT ").append(Long.toString(n)).toString(), null);
+        @SuppressLint("Recycle") final Cursor cursor = db
+                .rawQuery(stringBuilder.append("SELECT * FROM ").append(TABLE_CHARACTERS)
+                                       .append(" LIMIT ").append(Long.toString(n)).toString(),
+                          null
+                );
         if (cursor.moveToFirst())
             do {
                 final byte[] image = cursor.getBlob(cursor.getColumnIndex(KEY_IMAGE));
                 characters.add(new Character(cursor.getInt(cursor.getColumnIndex(KEY_ID)),
-                        cursor.getString(cursor.getColumnIndex(KEY_FIRSTNAME)),
-                        cursor.getString(cursor.getColumnIndex(KEY_LASTNAME)),
-                        cursor.getString(cursor.getColumnIndex(KEY_WEBURL)),
-                        cursor.getDouble(cursor.getColumnIndex(KEY_LATITUDE)),
-                        cursor.getDouble(cursor.getColumnIndex(KEY_LONGITUDE)),
-                        decodeByteArray(image, 0, image.length)
+                                             cursor.getString(cursor.getColumnIndex(KEY_FIRSTNAME)),
+                                             cursor.getString(cursor.getColumnIndex(KEY_LASTNAME)),
+                                             cursor.getString(cursor.getColumnIndex(KEY_WEBURL)),
+                                             cursor.getDouble(cursor.getColumnIndex(KEY_LATITUDE)),
+                                             cursor.getDouble(cursor.getColumnIndex(KEY_LONGITUDE)),
+                                             createScaledBitmap(
+                                                     decodeByteArray(image, 0, image.length), 150,
+                                                     200, false
+                                             )
                 ));
             } while (cursor.moveToNext());
         cursor.close();
