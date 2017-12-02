@@ -6,7 +6,6 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
@@ -19,7 +18,9 @@ import fr.fcomte.univ.iut.martin.florent.meetit.views.fragments.CreditsFragment;
 import fr.fcomte.univ.iut.martin.florent.meetit.views.fragments.DataFragment;
 import fr.fcomte.univ.iut.martin.florent.meetit.views.fragments.HomeFragment;
 import fr.fcomte.univ.iut.martin.florent.meetit.views.fragments.MapFragment;
+import lombok.experimental.FieldDefaults;
 
+import static android.support.v4.view.GravityCompat.START;
 import static fr.fcomte.univ.iut.martin.florent.meetit.R.id.action_settings;
 import static fr.fcomte.univ.iut.martin.florent.meetit.R.id.content_main;
 import static fr.fcomte.univ.iut.martin.florent.meetit.R.id.drawer_layout;
@@ -35,16 +36,31 @@ import static fr.fcomte.univ.iut.martin.florent.meetit.R.layout.activity_main;
 import static fr.fcomte.univ.iut.martin.florent.meetit.R.menu.main;
 import static fr.fcomte.univ.iut.martin.florent.meetit.R.string.navigation_drawer_close;
 import static fr.fcomte.univ.iut.martin.florent.meetit.R.string.navigation_drawer_open;
+import static lombok.AccessLevel.PRIVATE;
 
+/**
+ * Activité principale chargée au démarrage de l'application <br/>
+ * Hérite de {@link AppCompatActivity} <br/>
+ * Implémente {@link NavigationView.OnNavigationItemSelectedListener}
+ */
+@FieldDefaults(level = PRIVATE)
 public final class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    private Fragment fragment;
+    Fragment fragment;
 
+    /**
+     * Change le fragment affiché à l'écran
+     */
     void changeFragment() {
         getSupportFragmentManager().beginTransaction().replace(content_main, fragment).commit();
     }
 
+    /**
+     * Création de la vue, de la barre de menu et de {@link HomeFragment}
+     *
+     * @param savedInstanceState {@link Bundle}
+     */
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,8 +68,9 @@ public final class MainActivity extends AppCompatActivity
         final Toolbar bar = findViewById(toolbar);
         setSupportActionBar(bar);
 
-        findViewById(fab).setOnClickListener(view -> Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show());
+        findViewById(fab).setOnClickListener(
+                view -> Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                                .setAction("Action", null).show());
 
         final DrawerLayout drawer = findViewById(drawer_layout);
         final ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -67,15 +84,23 @@ public final class MainActivity extends AppCompatActivity
         changeFragment();
     }
 
+    /**
+     * @see AppCompatActivity#onBackPressed()
+     */
     @Override
     public void onBackPressed() {
         final DrawerLayout drawer = findViewById(drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START))
-            drawer.closeDrawer(GravityCompat.START);
+        if (drawer.isDrawerOpen(START))
+            drawer.closeDrawer(START);
         else
             super.onBackPressed();
     }
 
+    /**
+     * @param menu {@link Menu}
+     * @return boolean
+     * @see AppCompatActivity#onCreateOptionsMenu(Menu)
+     */
     @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -83,6 +108,11 @@ public final class MainActivity extends AppCompatActivity
         return true;
     }
 
+    /**
+     * @param item {@link MenuItem}
+     * @return boolean
+     * @see AppCompatActivity#onOptionsItemSelected(MenuItem)
+     */
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -97,6 +127,12 @@ public final class MainActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Création et affichage d'un nouveau fragment suivant l'option choisie dans le menu
+     *
+     * @param item {@link MenuItem}
+     * @return boolean
+     */
     @Override
     public boolean onNavigationItemSelected(@NonNull final MenuItem item) {
         // Handle navigation view item clicks here.
@@ -119,7 +155,7 @@ public final class MainActivity extends AppCompatActivity
         }
 
         changeFragment();
-        ((DrawerLayout) findViewById(drawer_layout)).closeDrawer(GravityCompat.START);
+        ((DrawerLayout) findViewById(drawer_layout)).closeDrawer(START);
         return true;
     }
 }

@@ -38,9 +38,9 @@ import java.util.Map;
 
 import fr.fcomte.univ.iut.martin.florent.meetit.manager.CharactersDatabaseHandler;
 import fr.fcomte.univ.iut.martin.florent.meetit.model.Character;
-import fr.fcomte.univ.iut.martin.florent.meetit.string.MyStringBuilder;
 import fr.fcomte.univ.iut.martin.florent.meetit.views.asynctask.NeighborAsyncTask;
 import lombok.NoArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static android.content.Intent.ACTION_VIEW;
@@ -59,27 +59,36 @@ import static fr.fcomte.univ.iut.martin.florent.meetit.R.string.search_delay_def
 import static fr.fcomte.univ.iut.martin.florent.meetit.R.string.search_delay_key;
 import static fr.fcomte.univ.iut.martin.florent.meetit.R.string.search_radius_default_value;
 import static fr.fcomte.univ.iut.martin.florent.meetit.R.string.search_radius_key;
+import static lombok.AccessLevel.PRIVATE;
 
 /**
- * A simple {@link Fragment} subclass.
+ * Fragment d'affichage de la carte <br/>
+ * Hérite de {@link Fragment} <br/>
+ * Implémente {@link OnMapReadyCallback}, {@link GoogleApiClient.ConnectionCallbacks} et {@link GoogleMap.OnMarkerClickListener}
  */
+@FieldDefaults(level = PRIVATE)
 @NoArgsConstructor
 public final class MapFragment extends Fragment implements OnMapReadyCallback,
                                                            GoogleApiClient.ConnectionCallbacks,
                                                            GoogleMap.OnMarkerClickListener {
 
-    private static final int             REQUEST_LOCATION = 1;
-    private final        MyStringBuilder stringBuilder    = new MyStringBuilder();
-    private Context                   context;
-    private CharactersDatabaseHandler handler;
-    private GoogleMap                 googleMap;
-    private GoogleApiClient           googleApiClient;
-    private LocationCallback          locationCallback;
-    private LocationRequest           locationRequest;
-    private boolean                   requestionLocationUpdates;
-    private SharedPreferences         preferences;
-    private BroadcastReceiver         neighborBR;
+    static final int           REQUEST_LOCATION = 1;
+    final        StringBuilder stringBuilder    = new StringBuilder();
+    Context                   context;
+    CharactersDatabaseHandler handler;
+    GoogleMap                 googleMap;
+    GoogleApiClient           googleApiClient;
+    LocationCallback          locationCallback;
+    LocationRequest           locationRequest;
+    boolean                   requestionLocationUpdates;
+    SharedPreferences         preferences;
+    BroadcastReceiver         neighborBR;
 
+    /**
+     * Initialisation du fragment
+     *
+     * @param savedInstanceState {@link Bundle}
+     */
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -104,6 +113,14 @@ public final class MapFragment extends Fragment implements OnMapReadyCallback,
         };
     }
 
+    /**
+     * Création de la vue
+     *
+     * @param inflater           {@link LayoutInflater}
+     * @param container          {@link ViewGroup}
+     * @param savedInstanceState {@link Bundle}
+     * @return {@link View}
+     */
     @Override
     public View onCreateView(@NonNull final LayoutInflater inflater, final ViewGroup container,
                              final Bundle savedInstanceState
@@ -114,15 +131,26 @@ public final class MapFragment extends Fragment implements OnMapReadyCallback,
         return view;
     }
 
+    /**
+     * Récupération de la carte
+     *
+     * @param googleMap {@link GoogleMap}
+     */
     @Override
     public void onMapReady(final GoogleMap googleMap) {
         this.googleMap = googleMap;
         this.googleMap.setOnMarkerClickListener(this);
     }
 
+    /**
+     * Mise à jour de l'affichage des personnages sur la carte
+     *
+     * @param location {@link Location}
+     */
     private void updateUI(final Location location) {
         googleMap.clear();
 
+        stringBuilder.setLength(0);
         if (location != null)
             stringBuilder.append(Double.toString(location.getLatitude())).append(" ")
                          .append(Double.toString(location.getLongitude()));
@@ -132,14 +160,14 @@ public final class MapFragment extends Fragment implements OnMapReadyCallback,
         final Map<Location, Character>[] charactersLocations = new Map[characters.size()];
 
         for (Character character : characters) {
-            final LatLng latLng = new LatLng(character.getLatitude(), character.getLongitude());
+            final LatLng latLng = new LatLng(character.latitude(), character.longitude());
             final MarkerOptions markerOptions = new MarkerOptions().position(latLng)
                                                                    .title(character.toString())
                                                                    .alpha(0.5f);
             if (location != null) {
                 final Location characterLocation = new Location("");
-                characterLocation.setLatitude(character.getLatitude());
-                characterLocation.setLongitude(character.getLongitude());
+                characterLocation.setLatitude(character.latitude());
+                characterLocation.setLongitude(character.longitude());
                 if (location.distanceTo(characterLocation) <= Float.parseFloat(
                         preferences.getString(getResources().getString(search_radius_key),
                                               getResources().getString(search_radius_default_value)
@@ -151,7 +179,7 @@ public final class MapFragment extends Fragment implements OnMapReadyCallback,
                 map.put(characterLocation, character);
                 charactersLocations[characters.indexOf(character)] = map;
             }
-            googleMap.addMarker(markerOptions).setTag(character.getWeburl());
+            googleMap.addMarker(markerOptions).setTag(character.weburl());
             builder.include(latLng);
         }
 
@@ -163,24 +191,40 @@ public final class MapFragment extends Fragment implements OnMapReadyCallback,
         googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 40));
     }
 
+    /**
+     * @see Fragment#onStart()
+     * @see GoogleApiClient#connect()
+     */
     @Override
     public void onStart() {
         super.onStart();
         googleApiClient.connect();
     }
 
+    /**
+     * @see Fragment#onStop()
+     * @see GoogleApiClient#disconnect()
+     */
     @Override
     public void onStop() {
         super.onStop();
         googleApiClient.disconnect();
     }
 
+    /**
+     * Affichage des personnages de la carte à la connexion
+     *
+     * @param bundle {@link Bundle}
+     */
     @Override
     public void onConnected(@Nullable final Bundle bundle) {
         startOrStopLocationUpdates();
         updateUI(null);
     }
 
+    /**
+     * Récupération de la permission d'accéder à la géolocalisation
+     */
     private void requestLocationPermission() {
         final Activity activity = getActivity();
         assert activity != null;
@@ -191,6 +235,11 @@ public final class MapFragment extends Fragment implements OnMapReadyCallback,
         );
     }
 
+    /**
+     * Paramètrage de la localisation <br/>
+     * Demande de récupération de la localisation selon une durée stockée dans les préférences
+     * et choisie par l'utilisateur
+     */
     private void setLocationParmeters() {
         locationCallback = new LocationCallback() {
 
@@ -220,6 +269,9 @@ public final class MapFragment extends Fragment implements OnMapReadyCallback,
         }
     }
 
+    /**
+     * Début des requêtes de localisation
+     */
     private void startLocationUpdates() {
         if (checkSelfPermission(context, ACCESS_FINE_LOCATION) != PERMISSION_GRANTED)
             requestLocationPermission();
@@ -230,10 +282,17 @@ public final class MapFragment extends Fragment implements OnMapReadyCallback,
                     );
     }
 
+    /**
+     * Fin des requêtes de localisation
+     */
     private void stopLocationUpdates() {
         getFusedLocationProviderClient(context).removeLocationUpdates(locationCallback);
     }
 
+    /**
+     * @see MapFragment#startLocationUpdates()
+     * @see MapFragment#stopLocationUpdates()
+     */
     private void startOrStopLocationUpdates() {
         if (requestionLocationUpdates)
             startLocationUpdates();
@@ -241,6 +300,12 @@ public final class MapFragment extends Fragment implements OnMapReadyCallback,
             stopLocationUpdates();
     }
 
+    /**
+     * @see Fragment#onResume()
+     * @see MapFragment#setLocationParmeters()
+     * @see MapFragment#startOrStopLocationUpdates()
+     * @see Context#registerReceiver(BroadcastReceiver, IntentFilter)
+     */
     @Override
     public void onResume() {
         super.onResume();
@@ -252,6 +317,11 @@ public final class MapFragment extends Fragment implements OnMapReadyCallback,
         );
     }
 
+    /**
+     * @see Fragment#onPause()
+     * @see MapFragment#stopLocationUpdates()
+     * @see Context#unregisterReceiver(BroadcastReceiver)
+     */
     @Override
     public void onPause() {
         super.onPause();
@@ -263,6 +333,13 @@ public final class MapFragment extends Fragment implements OnMapReadyCallback,
     public void onConnectionSuspended(final int i) {
     }
 
+    /**
+     * Affichage du site du personnage selon le {@link Marker} cliqué
+     *
+     * @param marker {@link Marker}
+     * @return boolean
+     * @see GoogleMap.OnMarkerClickListener#onMarkerClick(Marker)
+     */
     @Override
     public boolean onMarkerClick(final Marker marker) {
         startActivity(new Intent(ACTION_VIEW, Uri.parse((String) marker.getTag())));

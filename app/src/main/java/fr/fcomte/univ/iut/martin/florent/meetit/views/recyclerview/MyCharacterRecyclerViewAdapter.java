@@ -12,36 +12,51 @@ import android.widget.TextView;
 import java.util.List;
 
 import fr.fcomte.univ.iut.martin.florent.meetit.model.Character;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
 
 import static android.view.animation.AnimationUtils.loadAnimation;
 import static fr.fcomte.univ.iut.martin.florent.meetit.R.anim.slide_in_right;
 import static fr.fcomte.univ.iut.martin.florent.meetit.R.id.image_view_character;
 import static fr.fcomte.univ.iut.martin.florent.meetit.R.id.text_view_character;
 import static fr.fcomte.univ.iut.martin.florent.meetit.R.layout.fragment_character;
+import static lombok.AccessLevel.PRIVATE;
 
 /**
- * {@link RecyclerView.Adapter} that can display a {@link fr.fcomte.univ.iut.martin.florent.meetit.model.Character}
+ * {@link RecyclerView.Adapter} pour l'affichage de {@link fr.fcomte.univ.iut.martin.florent.meetit.model.Character}
  */
-public final class MyCharacterRecyclerViewAdapter extends RecyclerView.Adapter<MyCharacterRecyclerViewAdapter.CharacterViewHolder> {
+@FieldDefaults(level = PRIVATE, makeFinal = true)
+@RequiredArgsConstructor
+public final class MyCharacterRecyclerViewAdapter
+        extends RecyclerView.Adapter<MyCharacterRecyclerViewAdapter.CharacterViewHolder> {
 
-    private final List<Character> characters;
-    private int firstAnimations = 5;
+    List<Character> characters;
+    @NonFinal int firstAnimations = 5;
 
-    public MyCharacterRecyclerViewAdapter(final List<Character> characters) {
-        this.characters = characters;
-    }
-
+    /**
+     * @param parent   {@link ViewGroup}
+     * @param viewType int
+     * @return {@link CharacterViewHolder}
+     * @see RecyclerView.Adapter#createViewHolder(ViewGroup, int)
+     */
     @Override
     public CharacterViewHolder onCreateViewHolder(final ViewGroup parent, final int viewType) {
         return new CharacterViewHolder(LayoutInflater.from(parent.getContext())
-                .inflate(fragment_character, parent, false));
+                                                     .inflate(fragment_character, parent, false));
     }
 
+    /**
+     * Affichage du personnage et de sa photo
+     *
+     * @param holder   {@link CharacterViewHolder}
+     * @param position int
+     */
     @Override
     public void onBindViewHolder(final CharacterViewHolder holder, int position) {
         final Character character = characters.get(position);
         holder.setText(character.toString());
-        holder.setImageBitmap(character.getImage());
+        holder.setImageBitmap(character.image());
         int startOffset = 0;
         if (firstAnimations > 0) {
             firstAnimations--;
@@ -50,16 +65,32 @@ public final class MyCharacterRecyclerViewAdapter extends RecyclerView.Adapter<M
         holder.anim(startOffset);
     }
 
+    /**
+     * @return nombre de personnages
+     */
     @Override
     public int getItemCount() {
         return characters.size();
     }
 
+    /**
+     * Vue d'un personnage <br/>
+     * Hérite de {@link RecyclerView.ViewHolder}
+     *
+     * @see Character
+     */
+    @FieldDefaults(level = PRIVATE, makeFinal = true)
     final class CharacterViewHolder extends RecyclerView.ViewHolder {
-        private final View view;
-        private final ImageView imageView;
-        private final TextView textView;
 
+        View      view;
+        ImageView imageView;
+        TextView  textView;
+
+        /**
+         * Constructeur
+         *
+         * @param view {@link View}
+         */
         CharacterViewHolder(final View view) {
             super(view);
             this.view = view;
@@ -67,14 +98,29 @@ public final class MyCharacterRecyclerViewAdapter extends RecyclerView.Adapter<M
             textView = view.findViewById(text_view_character);
         }
 
+        /**
+         * Affichage du nom et prénom du personnage
+         *
+         * @param text {@link String}
+         */
         void setText(final String text) {
             textView.setText(text);
         }
 
+        /**
+         * Affichage de la photo du personnage
+         *
+         * @param imageBitmap {@link Bitmap}
+         */
         void setImageBitmap(final Bitmap imageBitmap) {
             imageView.setImageBitmap(imageBitmap);
         }
 
+        /**
+         * Animation à l'apparition de la vue
+         *
+         * @param startOffset long
+         */
         void anim(final long startOffset) {
             final Animation animation = loadAnimation(view.getContext(), slide_in_right);
             animation.setStartOffset(startOffset);

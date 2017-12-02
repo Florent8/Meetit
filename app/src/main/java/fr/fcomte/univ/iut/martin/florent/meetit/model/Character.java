@@ -2,33 +2,51 @@ package fr.fcomte.univ.iut.martin.florent.meetit.model;
 
 import android.graphics.Bitmap;
 
-import fr.fcomte.univ.iut.martin.florent.meetit.string.MyStringBuilder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.Accessors;
+import lombok.experimental.FieldDefaults;
 
-import static android.graphics.Bitmap.createScaledBitmap;
+import static lombok.AccessLevel.PRIVATE;
 
+/**
+ * Représentation d'un personnage
+ */
+@FieldDefaults(level = PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
+@Accessors(fluent = true)
 public final class Character {
 
-    private final MyStringBuilder stringBuilder = new MyStringBuilder();
-    @Getter private final int    id;
-    private final         String firstname;
-    private final         String lastname;
-    @Getter private final String weburl;
-    @Getter private final double latitude;
-    @Getter private final double longitude;
-    @Getter private final Bitmap image;
+    StringBuilder stringBuilder = new StringBuilder();
+    @Getter int id;
+    String firstname;
+    String lastname;
+    @Getter String weburl;
+    @Getter double latitude;
+    @Getter double longitude;
+    @Getter Bitmap image;
 
+    /**
+     * Affiche le nom et le prénom sur deux lignes
+     *
+     * @return {@link String}
+     */
     @Override
     public String toString() {
+        stringBuilder.setLength(0);
         stringBuilder.append(firstname);
         if (lastname != null)
             stringBuilder.append("\n").append(lastname);
         return stringBuilder.toString();
     }
 
+    /**
+     * Affiche le nom et le prénom sur une seule ligne
+     *
+     * @return {@link String}
+     */
     public String toStringInline() {
+        stringBuilder.setLength(0);
         stringBuilder.append(firstname);
         if (lastname != null)
             stringBuilder.append(" ").append(lastname);
