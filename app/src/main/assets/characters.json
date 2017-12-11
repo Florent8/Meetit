@@ -1,0 +1,51 @@
+[
+  {
+    "firstname": "Jean-François",
+    "lastname": "Couchot",
+    "weburl": "http://members.femto-st.fr/jf-couchot/fr",
+    "latitude": 47.642900,
+    "longitude": 6.840027,
+    "imageName": "couchot.png"
+  },
+  {
+    "firstname": "Raphaël",
+    "lastname": "Couturier",
+    "weburl": "http://members.femto-st.fr/raphael-couturier/fr",
+    "latitude": 47.659518,
+    "longitude": 6.813337,
+    "imageName": "couturier.png"
+  },
+  {
+    "firstname": "Stéphane",
+    "lastname": "Domas",
+    "weburl": "http://info.iut-bm.univ-fcomte.fr/staff/sdomas",
+    "latitude": 47.6387143,
+    "longitude": 6.8370225,
+    "imageName": "domas.png"
+  },
+  {
+    "firstname": "Abdallah",
+    "lastname": "Makhoul",
+    "weburl": "http://members.femto-st.fr/abdallah-makhoul/fr",
+    "latitude": 47.638114,
+    "longitude": 6.862139,
+    "imageName": "makhoul.png"
+  },
+  {
+    "firstname": "Chocolat",
+    "imageName": "chocolat.png"
+  },
+  {
+    "firstname": "Mini Mew",
+    "imageName": "mini_mew.png"
+  },
+  {
+    "firstname": "Rin",
+    "lastname": "Tezuka",
+    "imageName": "rin.png"
+  },
+  {
+    "firstname": "Konjiki no Yami",
+    "imageName": "yami.png"
+  }
+]

@@ -6,8 +6,11 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.google.gson.Gson;
+
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,15 +25,15 @@ import static android.graphics.BitmapFactory.decodeByteArray;
 import static lombok.AccessLevel.PRIVATE;
 
 /**
- * Gestion des personnages en base de données <br/>
- * Hérite de {@link SQLiteOpenHelper}
+ * Gestion des personnages en base de données
  */
 @FieldDefaults(level = PRIVATE, makeFinal = true)
 public final class CharactersDatabaseHandler extends SQLiteOpenHelper {
 
     // Database
-    static String DATABASE_NAME    = "characters_db";
-    static byte   DATABASE_VERSION = 1;
+    static String DATABASE_NAME        = "characters_db";
+    static byte   DATABASE_VERSION     = 1;
+    static String CHARACTERS_JSON_FILE = "characters.json";
 
     // Table Characters
     static String TABLE_CHARACTERS = "characters";
@@ -51,7 +54,7 @@ public final class CharactersDatabaseHandler extends SQLiteOpenHelper {
     /**
      * Constructeur
      *
-     * @param context {@link Context}
+     * @param context activité où est instanciée la classe
      */
     public CharactersDatabaseHandler(final Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -61,10 +64,11 @@ public final class CharactersDatabaseHandler extends SQLiteOpenHelper {
     /**
      * Création et initialisation de la table {@value TABLE_CHARACTERS} en base de données
      *
-     * @param db {@link SQLiteDatabase}
-     * @see CharactersDatabaseHandler#insert(SQLiteDatabase, String, String, String, float, float)
+     * @param db database
+     * @see CharactersDatabaseHandler#insert(SQLiteDatabase, Character)
      * @see CharactersDatabaseHandler#updateImage(SQLiteDatabase, String, long)
      */
+    @SneakyThrows(IOException.class)
     @Override
     public void onCreate(final SQLiteDatabase db) {
         db.execSQL("CREATE TABLE " + TABLE_CHARACTERS + "("
@@ -75,68 +79,50 @@ public final class CharactersDatabaseHandler extends SQLiteOpenHelper {
                    + KEY_LATITUDE + " REAL DEFAULT NULL,"
                    + KEY_LONGITUDE + " REAL DEFAULT NULL,"
                    + KEY_IMAGE + " BLOB DEFAULT NULL)");
-        updateImage(db, "couchot.png", insert(db, "Jean-François", "Couchot",
-                                              "http://members.femto-st.fr/jf-couchot/fr",
-                                              47.642900f,
-                                              6.840027f
-        ));
-        updateImage(db, "couturier.png", insert(db, "Raphaël", "Couturier",
-                                                "http://members.femto-st.fr/raphael-couturier/fr",
-                                                47.659518f, 6.813337f
-        ));
-        updateImage(db, "domas.png", insert(db, "Stéphane", "Domas",
-                                            "http://info.iut-bm.univ-fcomte.fr/staff/sdomas/",
-                                            47.6387143f, 6.8370225f
-        ));
-        updateImage(db, "makhoul.png", insert(db, "Abdallah", "Makhoul",
-                                              "http://members.femto-st.fr/abdallah-makhoul/fr",
-                                              47.638114f, 6.862139f
-        ));
-        updateImage(db, "chocolat.png", insert(db, "Chocolat", null, null, 0, 0));
-        updateImage(db, "mini_mew.png", insert(db, "Mini Mew", null, null, 0, 0));
-        updateImage(db, "rin.png", insert(db, "Rin", "Tezuka", null, 0, 0));
-        updateImage(db, "yami.png", insert(db, "Konjiki no Yami", null, null, 0, 0));
+
+        final Character[] characters = new Gson().fromJson(
+                new InputStreamReader(context.getAssets().open(CHARACTERS_JSON_FILE)),
+                Character[].class
+        );
+
+        for (final Character character : characters)
+            updateImage(db, character.imageName(),
+                        insert(db, character)
+            );
     }
 
     /**
      * Insertion d'un personnage en base de données
      *
-     * @param db        {@link SQLiteDatabase}
-     * @param firstname {@link String}
-     * @param lastname  {@link String}
-     * @param weburl    {@link String}
-     * @param latitude  float
-     * @param longitude float
+     * @param db        database
+     * @param character personnage à insérer
      * @return id du personnage inséré
      */
-    private long insert(final SQLiteDatabase db, final String firstname, final String lastname,
-                        final String weburl, final float latitude, final float longitude
-    ) {
+    private long insert(final SQLiteDatabase db, final Character character) {
         values.clear();
-        values.put(KEY_FIRSTNAME, firstname);
-        values.put(KEY_LASTNAME, lastname);
-        values.put(KEY_WEBURL, weburl);
-        if (latitude != 0)
-            values.put(KEY_LATITUDE, latitude);
-        if (longitude != 0)
-            values.put(KEY_LONGITUDE, longitude);
+        values.put(KEY_FIRSTNAME, character.firstname());
+        values.put(KEY_LASTNAME, character.lastname());
+        values.put(KEY_WEBURL, character.weburl());
+        if (character.latitude() != 0)
+            values.put(KEY_LATITUDE, character.latitude());
+        if (character.longitude() != 0)
+            values.put(KEY_LONGITUDE, character.longitude());
         return db.insert(TABLE_CHARACTERS, null, values);
     }
 
     /**
      * Insertion d'une image en base de données
      *
-     * @param db {@link SQLiteDatabase}
-     * @param s  {@link String} nom de l'image dans le dossier « assets »
-     * @param id long
+     * @param db database
+     * @param s  nom de l'image
+     * @param id id du personnage
      */
     @SneakyThrows(IOException.class)
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     private void updateImage(final SQLiteDatabase db, final String s, final long id) {
         @Cleanup final InputStream inputStream = context.getAssets().open(s);
         final byte[] bitmapdata = new byte[inputStream.available()];
-        inputStream.read(bitmapdata);
-
+        if (inputStream.read(bitmapdata) != -1)
+            throw new RuntimeException("Problème de lecture de " + s);
         values.clear();
         values.put(KEY_IMAGE, bitmapdata);
         db.update(TABLE_CHARACTERS, values, KEY_ID + " = ?",
@@ -145,10 +131,8 @@ public final class CharactersDatabaseHandler extends SQLiteOpenHelper {
     }
 
     /**
-     * Récupération de la liste des n premiers personnages en base de données
-     *
-     * @param n long
-     * @return {@link List} de {@link Character}
+     * @param n nombre de personnages
+     * @return liste des n premiers personnages en base de données
      */
     public List<Character> getCharacters(final long n) {
         final List<Character> characters = new ArrayList<>();
@@ -166,8 +150,8 @@ public final class CharactersDatabaseHandler extends SQLiteOpenHelper {
                                              cursor.getString(cursor.getColumnIndex(KEY_FIRSTNAME)),
                                              cursor.getString(cursor.getColumnIndex(KEY_LASTNAME)),
                                              cursor.getString(cursor.getColumnIndex(KEY_WEBURL)),
-                                             cursor.getDouble(cursor.getColumnIndex(KEY_LATITUDE)),
-                                             cursor.getDouble(cursor.getColumnIndex(KEY_LONGITUDE)),
+                                             cursor.getFloat(cursor.getColumnIndex(KEY_LATITUDE)),
+                                             cursor.getFloat(cursor.getColumnIndex(KEY_LONGITUDE)),
                                              createScaledBitmap(
                                                      decodeByteArray(image, 0, image.length), 150,
                                                      200, false
@@ -187,9 +171,7 @@ public final class CharactersDatabaseHandler extends SQLiteOpenHelper {
     }
 
     /**
-     * Récupère tous les personnages en base de données
-     *
-     * @return {@link List} de {@link Character}
+     * @return tous les personnages en base de données
      * @see CharactersDatabaseHandler#getCharacters(long)
      */
     public List<Character> getAllCharacters() {

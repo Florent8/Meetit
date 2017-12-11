@@ -18,13 +18,21 @@ import static lombok.AccessLevel.PRIVATE;
 public final class Character {
 
     StringBuilder stringBuilder = new StringBuilder();
-    @Getter int id;
-    String firstname;
-    String lastname;
+    @Getter int    id;
+    @Getter String firstname;
+    @Getter String lastname;
     @Getter String weburl;
-    @Getter double latitude;
-    @Getter double longitude;
+    @Getter float  latitude;
+    @Getter float  longitude;
+    @Getter String imageName;
     @Getter Bitmap image;
+
+    public Character(int id, String firstname, String lastname, String weburl, float latitude,
+                     float longitude,
+                     Bitmap image
+    ) {
+        this(id, firstname, lastname, weburl, latitude, longitude, null, image);
+    }
 
     /**
      * Affiche le nom et le prénom sur deux lignes
