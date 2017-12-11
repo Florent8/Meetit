@@ -5,9 +5,12 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 
 import com.google.gson.Gson;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -120,9 +123,10 @@ public final class CharactersDatabaseHandler extends SQLiteOpenHelper {
     @SneakyThrows(IOException.class)
     private void updateImage(final SQLiteDatabase db, final String s, final long id) {
         @Cleanup final InputStream inputStream = context.getAssets().open(s);
-        final byte[] bitmapdata = new byte[inputStream.available()];
-        if (inputStream.read(bitmapdata) != -1)
-            throw new RuntimeException("Problème de lecture de " + s);
+        Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+        final byte[] bitmapdata = stream.toByteArray();
         values.clear();
         values.put(KEY_IMAGE, bitmapdata);
         db.update(TABLE_CHARACTERS, values, KEY_ID + " = ?",
@@ -140,7 +144,7 @@ public final class CharactersDatabaseHandler extends SQLiteOpenHelper {
         final Cursor cursor = db
                 .query(TABLE_CHARACTERS,
                        new String[]{KEY_ID, KEY_FIRSTNAME, KEY_LASTNAME, KEY_WEBURL, KEY_LATITUDE,
-                                    KEY_LONGITUDE},
+                                    KEY_LONGITUDE, KEY_IMAGE},
                        null, null, null, null, null, Long.toString(n)
                 );
         if (cursor.moveToFirst())
