@@ -27,17 +27,15 @@ public final class Character {
     @Getter String imageName;
     @Getter Bitmap image;
 
-    public Character(int id, String firstname, String lastname, String weburl, float latitude,
-                     float longitude,
-                     Bitmap image
+    public Character(final int id, final String firstname, final String lastname,
+                     final String weburl, final float latitude, final float longitude,
+                     final Bitmap image
     ) {
         this(id, firstname, lastname, weburl, latitude, longitude, null, image);
     }
 
     /**
-     * Affiche le nom et le prénom sur deux lignes
-     *
-     * @return {@link String}
+     * @return {@link Character#firstname} et {@link Character#lastname} sur deux lignes
      */
     @Override
     public String toString() {
@@ -49,9 +47,7 @@ public final class Character {
     }
 
     /**
-     * Affiche le nom et le prénom sur une seule ligne
-     *
-     * @return {@link String}
+     * @return {@link Character#firstname} et {@link Character#lastname} sur une ligne
      */
     public String toStringInline() {
         stringBuilder.setLength(0);
